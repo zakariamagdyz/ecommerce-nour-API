@@ -1,14 +1,15 @@
 const HttpError = require("../utils/HttpError");
 const catchAsync = require("../utils/catchAsync");
-const selectedFields = require("../utils/selectFields");
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
-const sendMail = require("../utils/sendMails");
+const Email = require("../utils/Email");
 const crypto = require("crypto");
+const Yup = require("yup");
+const selectFields = require("../utils/selectFields.js");
 
 //////////////////////////////////////////////////////////////////////
 const createSendToken = (user, statusCode, res) => {
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
@@ -25,16 +26,83 @@ const createSendToken = (user, statusCode, res) => {
   res.status(statusCode).json({ status: "success", data: { user } });
 };
 
-//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 
-exports.signUp = catchAsync(async (req, res, next) => {
-  const userData = selectedFields(req.body, [
+const validatUserInput = async (data) => {
+  // create validation schema
+  const userSchema = Yup.object({
+    name: Yup.string().required().trim(),
+    email: Yup.string().required().trim().email(),
+    password: Yup.string().required().trim().min(8),
+    passwordConfirm: Yup.string()
+      .required()
+      .trim()
+      .min(8)
+      .test("passwordConfirm", "passwords Don't match", function (val) {
+        return val === this.parent.password;
+      }),
+  });
+
+  try {
+    await userSchema.validate(data);
+  } catch (err) {
+    throw new HttpError(err.message, 401);
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
+exports.sendActivationToSignUp = catchAsync(async (req, res, next) => {
+  const filterdBody = selectFields(req.body, [
     "name",
     "email",
     "password",
     "passwordConfirm",
   ]);
+  await validatUserInput(filterdBody);
 
+  const token = jwt.sign(filterdBody, process.env.JWT_ACTIVATION_SECRET, {
+    expiresIn: "10min",
+  });
+
+  const url = `${process.env.CLIENT_SIDE_SERVER}/active-account/${token}`;
+
+  try {
+    await new Email(filterdBody, url).sendWelcome();
+
+    const msg = `Email has been sent successfully to ${filterdBody.email}, please follow the instructions to activate your account`;
+
+    res.status(200).json({ status: "success", message: msg });
+  } catch (error) {
+    console.log(error);
+    return next(
+      new HttpError(
+        `Something went wrong while sending email, Please try again`,
+        500
+      )
+    );
+  }
+});
+/////////////////////////////////////////////////////////////////////////
+
+exports.signUp = catchAsync(async (req, res, next) => {
+  const token = req.body.token;
+  if (!token)
+    return next(
+      new new HttpError(
+        "There is no activation token, Please check your inbox",
+        401
+      )()
+    );
+
+  const userData = jwt.verify(
+    token,
+    process.env.JWT_ACTIVATION_SECRET,
+    {},
+    (err, value) => {
+      if (err) throw err;
+      return value;
+    }
+  );
   const newUser = await User.create(userData);
   createSendToken(newUser, 201, res);
 });
@@ -64,7 +132,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   const decode = await jwt.verify(
     token,
-    process.env.JWT_SECRET,
+    process.env.JWT_SECRET_KEY,
     {},
     (err, val) => {
       if (err) throw err;
@@ -124,16 +192,12 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
   const resetUrl = `${req.protocol}://${req.get(
     "host"
-  )}/crwn-shop/v1/users/resetPassword/${resetToken}`;
+  )}/lamaApi/v1/users/resetPassword/${resetToken}`;
 
-  const message = `Did you forgot your password ? Please visit this link to create a new one ${resetUrl}`;
+  const resetUrlForClientSide = `${process.env.CLIENT_URL}/active-account/${resetToken}`;
 
   try {
-    await sendMail({
-      email,
-      subject: "Your password reset token (valid for 10 min)",
-      message,
-    });
+    await new Email(user, resetUrl).sendPasswordReset();
 
     res.status(200).json({
       status: "success",
@@ -213,9 +277,9 @@ exports.isSignedIn = catchAsync(async (req, res, next) => {
       new HttpError("You are not logged in! Please log in to get access", 401)
     );
 
-  const decode = await jwt.verify(
+  const decode = jwt.verify(
     token,
-    process.env.JWT_SECRET,
+    process.env.JWT_SECRET_KEY,
     {},
     (err, val) => {
       if (err) throw err;

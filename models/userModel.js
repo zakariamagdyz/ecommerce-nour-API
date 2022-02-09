@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 
@@ -17,7 +16,14 @@ const userSchema = new mongoose.Schema({
     maxLength: [50, "The maximum length of email is 20"],
     trim: true,
     lowercase: true,
-    validate: [validator.isEmail, "Invalid email adress"],
+    validate: [
+      (value) => {
+        const pattern =
+          /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return pattern.test(value);
+      },
+      "Invalid email adress",
+    ],
   },
   photo: String,
 

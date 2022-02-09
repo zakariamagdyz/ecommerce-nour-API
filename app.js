@@ -3,6 +3,7 @@ const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
 const errorController = require("./controllers/errorController.js");
 const userRouter = require("./routes/userRouter.js");
+const HttpError = require("./utils/HttpError.js");
 
 const app = express();
 
@@ -16,7 +17,7 @@ app.use(cookieParser());
 
 app.use(express.static("public"));
 
-app.use("/api/v1/users", userRouter);
+app.use("/lamaApi/v1/users", userRouter);
 
 app.all("*", (req, res, next) => {
   return next(
