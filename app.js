@@ -4,6 +4,7 @@ const morgan = require("morgan");
 const errorController = require("./controllers/errorController.js");
 const userRouter = require("./routes/userRouter.js");
 const HttpError = require("./utils/HttpError.js");
+const path = require("path");
 
 const app = express();
 
@@ -15,7 +16,7 @@ app.use(express.json());
 
 app.use(cookieParser());
 
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/lamaApi/v1/users", userRouter);
 

@@ -1,4 +1,5 @@
 const express = require("express");
+const app = require("../app.js");
 const authController = require("../controllers/authController.js");
 const userController = require("../controllers/userController");
 const router = express.Router();
@@ -17,5 +18,14 @@ router.get("/getMe", userController.getMe, userController.getAUser);
 router.patch("/updateMyPassword", authController.updatePassword);
 router.patch("/updateMe", userController.updateMe);
 router.delete("/deleteMe", userController.deleteMe);
+
+router.use(authController.restrictTo("admin"));
+
+router.route("/").get(userController.getUsers);
+router
+  .route("/:id")
+  .get(userController.getAUser)
+  .patch(userController.updateAUser)
+  .delete(userController.deleteAUser);
 
 module.exports = router;
