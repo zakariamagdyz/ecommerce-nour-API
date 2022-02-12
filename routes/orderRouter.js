@@ -7,6 +7,7 @@ const router = express.Router({ mergeParams: true });
 router.use(authController.protect);
 
 router.post("/", orderController.createAnOrder);
+router.post("/payment", orderController.checkoutPayment);
 
 router.use(authController.restrictTo("admin"));
 

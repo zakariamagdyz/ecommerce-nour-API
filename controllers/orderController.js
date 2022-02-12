@@ -1,6 +1,8 @@
 const Order = require("../models/orderModel.js");
 const catchAsync = require("../utils/catchAsync.js");
 const factory = require("./factoryController.js");
+const stripe = require("stripe")(process.env.STRIPE_SECRET);
+const HttpError = require("../utils/HttpError.js");
 
 exports.getAllOrders = factory.getAll(Order, "userId");
 exports.getAnOrder = factory.getOne(Order);
@@ -24,4 +26,20 @@ exports.incomeStats = catchAsync(async (req, res, next) => {
   ]);
 
   res.status(200).json({ status: "success", data: { stats } });
+});
+
+exports.checkoutPayment = catchAsync(async (req, res, next) => {
+  const body = {
+    source: req.body.token,
+    amount: req.body.amount,
+    currency: "usd",
+  };
+
+  stripe.charges.create(body, (err, res) => {
+    if (err) {
+      return next(new HttpError(err.message, 500));
+    }
+
+    return res.status(200).json({ status: "success", data: { data: res } });
+  });
 });
