@@ -46,6 +46,8 @@ const validatUserInput = async (data) => {
   try {
     await userSchema.validate(data);
   } catch (err) {
+    // we throw error here cause this fn if rejected it will be fulfilled and the HOF will not catch any errors
+    //, so to give HOF this error we need to throw it
     throw new HttpError(err.message, 401);
   }
 };
