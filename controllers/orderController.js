@@ -2,7 +2,7 @@ const Order = require("../models/orderModel.js");
 const catchAsync = require("../utils/catchAsync.js");
 const factory = require("./factoryController.js");
 
-exports.getAllOrders = factory.getAll(Order);
+exports.getAllOrders = factory.getAll(Order, "userId");
 exports.getAnOrder = factory.getOne(Order);
 
 exports.createAnOrder = factory.createOne(Order);
