@@ -15,7 +15,7 @@ module.exports = class ApiFeature {
     return this;
   }
 
-  sort() {
+  sorting() {
     if (this.queryString.sort) {
       const sortFields = this.queryString.sort.split(",").join(" ");
       this.query = this.query.sort(sortFields);
@@ -25,7 +25,7 @@ module.exports = class ApiFeature {
     return this;
   }
 
-  limitingFileds() {
+  limitingFields() {
     if (this.queryString.fields) {
       const fields = this.queryString.fields.split(",").join(" ");
       this.query = this.query.select(fields);

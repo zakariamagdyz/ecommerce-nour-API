@@ -1,10 +1,16 @@
 const express = require("express");
-const app = require("../app.js");
 const authController = require("../controllers/authController.js");
 const userController = require("../controllers/userController");
+const orderRouter = require("./orderRouter.js");
+const cartRouter = require("./cartRouter.js");
+
 const router = express.Router();
 
-router.route("/active-account").post(authController.sendActivationToSignUp);
+// for nested route
+router.use("/:id/orders", orderRouter);
+router.use("/:id/cart", cartRouter);
+
+router.post("/active-account", authController.sendActivationToSignUp);
 router.post("/signup", authController.signUp);
 router.post("/signin", authController.signIn);
 router.patch("/forgotPassword", authController.forgotPassword);
@@ -21,7 +27,7 @@ router.delete("/deleteMe", userController.deleteMe);
 
 router.use(authController.restrictTo("admin"));
 
-router.route("/").get(userController.getUsers);
+router.route("/").get(userController.getUsers).post(userController.createAUser);
 router
   .route("/:id")
   .get(userController.getAUser)

@@ -15,19 +15,21 @@ const getModelName = (Model, plural) => {
 };
 
 /////////////////////////////////////////////////////////////////////////////////
-exports.getAll = (Model) =>
+exports.getAll = (Model, localField) =>
   catchAsync(async (req, res, next) => {
-    // to allow get items for specific category
+    // Allow get data related to specific field
     let filter = {};
-    if (req.params.categoryId) filter = { category: req.params.categoryId };
+    if (req.params.id && localField) filter = { [localField]: req.params.id };
+
     // 1) get model name
     const modelName = getModelName(Model, "plural");
+
     // 2) create the query
     const features = new ApiFeatures(Model.find(filter), req.query)
+      .filter()
       .sorting()
       .pagination()
-      .limitingFields()
-      .filter();
+      .limitingFields();
 
     const data = await features.query;
 

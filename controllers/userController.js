@@ -40,11 +40,4 @@ exports.getUsers = factory.getAll(User);
 exports.getAUser = factory.getOne(User);
 exports.updateAUser = factory.updateOne(User);
 exports.deleteAUser = factory.deleteOne(User);
-exports.createAUser = (req, res, next) => {
-  return next(
-    new HttpError(
-      "This route is not defined, Please use /signUp route to ",
-      400
-    )
-  );
-};
+exports.createAUser = factory.createOne(User);
