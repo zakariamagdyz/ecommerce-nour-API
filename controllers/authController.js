@@ -8,11 +8,20 @@ const Yup = require("yup");
 const selectFields = require("../utils/selectFields.js");
 
 //////////////////////////////////////////////////////////////////////
+// we creat&send token in signin, singup, resetPassword, updatePassword,
 const createSendToken = (user, statusCode, res) => {
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
+  user.password = undefined;
+
+  setCookie(token, res);
+
+  res.status(statusCode).json({ status: "success", data: { user } });
+};
+
+function setCookie(token, res) {
   const cookieOptions = {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
@@ -20,11 +29,8 @@ const createSendToken = (user, statusCode, res) => {
     secure: process.env.NODE_ENV === "production" ? true : false,
     httpOnly: process.env.NODE_ENV === "production" ? true : false,
   };
-
-  user.password = undefined;
   res.cookie("jwt", token, cookieOptions);
-  res.status(statusCode).json({ status: "success", data: { user } });
-};
+}
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -62,41 +68,51 @@ exports.sendActivationToSignUp = catchAsync(async (req, res, next) => {
   ]);
   await validatUserInput(filterdBody);
 
-  const token = jwt.sign(filterdBody, process.env.JWT_ACTIVATION_SECRET, {
-    expiresIn: "10min",
-  });
+  await sendMail(res, filterdBody);
+});
 
-  const url = `${process.env.CLIENT_SIDE_SERVER}/active-account/${token}`;
-
+async function sendMail(res, user) {
   try {
-    await new Email(filterdBody, url).sendWelcome();
+    const token = jwt.sign(user, process.env.JWT_ACTIVATION_SECRET, {
+      expiresIn: "10min",
+    });
+    const url = `${process.env.CLIENT_SIDE_SERVER}/active-account/${token}`;
+    const msg = `Email has been sent successfully to ${user.email}, please follow the instructions to activate your account`;
 
-    const msg = `Email has been sent successfully to ${filterdBody.email}, please follow the instructions to activate your account`;
+    await new Email(user, url).sendWelcome();
 
     res.status(200).json({ status: "success", message: msg });
   } catch (error) {
     console.log(error);
-    return next(
-      new HttpError(
-        `Something went wrong while sending email, Please try again`,
-        500
-      )
+    throw new HttpError(
+      `Something went wrong while sending email, Please try again`,
+      500
     );
   }
-});
+}
 /////////////////////////////////////////////////////////////////////////
 
 exports.signUp = catchAsync(async (req, res, next) => {
   const token = req.body.token;
-  if (!token)
-    return next(
-      new new HttpError(
-        "There is no activation token, Please check your inbox",
-        401
-      )()
-    );
 
-  const userData = jwt.verify(
+  existingToken(token);
+
+  const userData = validateToken(token);
+
+  const newUser = await User.create(userData);
+  createSendToken(newUser, 201, res);
+});
+
+function existingToken(token) {
+  if (!token)
+    throw new HttpError(
+      "There is no activation token, Please check your inbox.",
+      401
+    );
+}
+
+function validateToken(token) {
+  return jwt.verify(
     token,
     process.env.JWT_ACTIVATION_SECRET,
     {},
@@ -105,57 +121,38 @@ exports.signUp = catchAsync(async (req, res, next) => {
       return value;
     }
   );
-  const newUser = await User.create(userData);
-  createSendToken(newUser, 201, res);
-});
+}
 
 //////////////////////////////////////////////////////////////////////
 exports.signIn = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
-  if (!email || !password)
-    return next(new HttpError("Please provide email and password", 400));
+  existingUserData(email, password);
+
   const user = await User.findOne({ email }).select("+password");
-  if (!user || !(await user.comparePasswords(password, user.password))) {
-    return next(new HttpError("Incorrect email or password", 400));
-  }
+
+  await validateUserData(password, user);
 
   createSendToken(user, 200, res);
 });
+
+function existingUserData(email, password) {
+  if (!email || !password)
+    throw new HttpError("Please provide email and password", 400);
+}
+
+async function validateUserData(inputPassword, user) {
+  if (!user || !(await user.comparePasswords(inputPassword, user.password))) {
+    throw new HttpError("Incorrect email or password", 400);
+  }
+}
 
 //////////////////////////////////////////////////////////////////////
 
 exports.protect = catchAsync(async (req, res, next) => {
   const token = req.cookies.jwt;
-  if (!token)
-    return next(
-      new HttpError("You are not logged in! Please log in to get access", 401)
-    );
 
-  const decode = await jwt.verify(
-    token,
-    process.env.JWT_SECRET_KEY,
-    {},
-    (err, val) => {
-      if (err) throw err;
-      return val;
-    }
-  );
-
-  const user = await User.findById(decode.id);
-
-  if (!user)
-    return next(
-      new HttpError(
-        "The user belonging to this token does no longer exist",
-        401
-      )
-    );
-
-  if (user.isPasswordChangedAfter(decode.iat))
-    return next(
-      new HttpError("User currently changed password, Please login again", 401)
-    );
+  const user = await validateUserPermission(token);
 
   req.user = user;
   next();
@@ -274,9 +271,17 @@ exports.logout = catchAsync(async (req, res, next) => {
 //////////////////////////////////////////////////////////////////////
 exports.isSignedIn = catchAsync(async (req, res, next) => {
   const token = req.cookies.jwt;
+
+  const user = await validateUserPermission(token);
+
+  res.status(200).json({ status: "success", data: { user } });
+});
+
+async function validateUserPermission(token) {
   if (!token)
-    return next(
-      new HttpError("You are not logged in! Please log in to get access", 401)
+    throw new HttpError(
+      "You are not logged in! Please log in to get access",
+      401
     );
 
   const decode = jwt.verify(
@@ -292,17 +297,16 @@ exports.isSignedIn = catchAsync(async (req, res, next) => {
   const user = await User.findById(decode.id);
 
   if (!user)
-    return next(
-      new HttpError(
-        "The user belonging to this token does no longer exist",
-        401
-      )
+    throw new HttpError(
+      "The user belonging to this token does no longer exist",
+      401
     );
 
   if (user.isPasswordChangedAfter(decode.iat))
-    return next(
-      new HttpError("User currently changed password, Please login again", 401)
+    throw new HttpError(
+      "User currently changed password, Please login again",
+      401
     );
 
-  res.status(200).json({ status: "success", data: { user } });
-});
+  return user;
+}

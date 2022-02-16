@@ -51,7 +51,7 @@ exports.getOne = (Model, popOptions) =>
     if (!data)
       return next(new HttpError(`No ${modelName} found with that ID!`, 400));
 
-    res.status(200).json({ status: "success", [modelName]: data });
+    res.status(200).json({ status: "success", data: { [modelName]: data } });
   });
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -63,7 +63,7 @@ exports.createOne = (Model, selectedOptions = []) =>
       filterdBody = selectedFields(filterdBody, selectedOptions);
     const newDoc = await Model.create(filterdBody);
 
-    res.status(201).json({ status: "success", [modelName]: newDoc });
+    res.status(201).json({ status: "success", data: { [modelName]: newDoc } });
   });
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -85,7 +85,9 @@ exports.updateOne = (Model, selectedOptions = []) =>
     if (!updatedDoc)
       return next(new HttpError(`No ${modelName} found with that ID!`, 404));
 
-    res.status(201).json({ status: "success", [modelName]: updatedDoc });
+    res
+      .status(201)
+      .json({ status: "success", data: { [modelName]: updatedDoc } });
   });
 /////////////////////////////////////////////////////////////////////////////////
 

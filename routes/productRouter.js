@@ -5,6 +5,7 @@ const authController = require("../controllers/authController.js");
 const router = express.Router();
 
 router.get("/", productController.getAllProducts);
+router.get("/:id", productController.getOneProduct);
 
 router.use(authController.protect, authController.restrictTo("admin"));
 
@@ -12,7 +13,6 @@ router.post("/", productController.createAProduct);
 
 router
   .route("/:id")
-  .get(productController.getOneProduct)
   .patch(productController.updateAProduct)
   .delete(productController.deleteAProduct);
 
