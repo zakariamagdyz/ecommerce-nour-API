@@ -8,12 +8,14 @@ const {
 
 exports.getAllCategories = factory.getAll(Category);
 
-exports.getCategoryProduct = catchAsync(async (req, res, next) => {
-  const pipeline = [{ $match: { category: ObjectId(req.params.id) } }];
+exports.filterdProducts = catchAsync(async (req, res, next) => {
+  const pipeline = [];
 
-  if (req.query.sort) {
-    pipeline.push(getSortStage(req));
-  }
+  // filter products by category if id exist
+  if (req.params.id)
+    pipeline.push({ $match: { category: ObjectId(req.params.id) } });
+
+  pipeline.push(getSortStage(req));
 
   if (req.query.size) pipeline.push(getMatchStage(req));
 

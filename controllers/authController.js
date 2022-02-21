@@ -6,6 +6,8 @@ const Email = require("../utils/Email");
 const crypto = require("crypto");
 const Yup = require("yup");
 const selectFields = require("../utils/selectFields.js");
+const { OAuth2Client } = require("google-auth-library");
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 //////////////////////////////////////////////////////////////////////
 // we creat&send token in signin, singup, resetPassword, updatePassword,
@@ -59,7 +61,7 @@ const validatUserInput = async (data) => {
 };
 
 //////////////////////////////////////////////////////////////////////
-exports.sendActivationToSignUp = catchAsync(async (req, res, next) => {
+exports.signUp = catchAsync(async (req, res, next) => {
   const filterdBody = selectFields(req.body, [
     "name",
     "email",
@@ -68,15 +70,25 @@ exports.sendActivationToSignUp = catchAsync(async (req, res, next) => {
   ]);
   await validatUserInput(filterdBody);
 
+  // check if user already exist
+
+  const user = await User.findOne({ email: filterdBody.email });
+  if (user)
+    return next(
+      new HttpError(
+        "This user already exist, visit /forgotpassword to reset your password."
+      )
+    );
+
   await sendMail(res, filterdBody);
 });
 
 async function sendMail(res, user) {
   try {
     const token = jwt.sign(user, process.env.JWT_ACTIVATION_SECRET, {
-      expiresIn: "10min",
+      expiresIn: "40min",
     });
-    const url = `${process.env.CLIENT_SIDE_SERVER}/active-account/${token}`;
+    const url = `${process.env.CLIENT_SIDE_SERVER}/activate-account/${token}`;
     const msg = `Email has been sent successfully to ${user.email}, please follow the instructions to activate your account`;
 
     await new Email(user, url).sendWelcome();
@@ -92,7 +104,7 @@ async function sendMail(res, user) {
 }
 /////////////////////////////////////////////////////////////////////////
 
-exports.signUp = catchAsync(async (req, res, next) => {
+exports.activateAccount = catchAsync(async (req, res, next) => {
   const token = req.body.token;
 
   existingToken(token);
@@ -189,9 +201,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   // 2) Create password reset token and password reset expire
   const resetToken = user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
-  const resetUrl = `${req.protocol}://${req.get(
-    "host"
-  )}/lamaApi/v1/users/resetPassword/${resetToken}`;
+  const resetUrl = `${process.env.CLIENT_SIDE_SERVER}/reset-password/${resetToken}`;
 
   const resetUrlForClientSide = `${process.env.CLIENT_URL}/active-account/${resetToken}`;
 
@@ -309,4 +319,39 @@ async function validateUserPermission(token) {
     );
 
   return user;
+}
+
+//////////////////////////////////////////////////
+exports.googleLogin = catchAsync(async (req, res, next) => {
+  const idToken = req.body.token;
+
+  if (!idToken)
+    return next(new HttpError("Google login failed, Try again", 400));
+
+  // verify google token
+  const ticket = await client.verifyIdToken({
+    idToken,
+    requiredAudience: process.env.GOOGLE_CLIENT_ID,
+  });
+  // Get user Data
+  const { name, email } = ticket.getPayload();
+  // Check if email already exists
+  const user = await User.findOne({ email });
+  // Singup if not exist
+  if (!user) return saveUserToDB({ name, email, res });
+  // Sign in if it exist
+  createSendToken(user, 200, res);
+});
+
+async function saveUserToDB({ name, email, res }) {
+  const password = email + "@@@@@$s";
+
+  const user = await User.create({
+    name,
+    email,
+    password,
+    passwordConfirm: password,
+  });
+
+  createSendToken(user, 201, res);
 }

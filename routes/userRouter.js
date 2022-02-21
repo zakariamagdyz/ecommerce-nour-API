@@ -10,9 +10,10 @@ const router = express.Router();
 router.use("/:id/orders", orderRouter);
 router.use("/:id/cart", cartRouter);
 
-router.post("/active-account", authController.sendActivationToSignUp);
 router.post("/signup", authController.signUp);
+router.post("/activateAccount", authController.activateAccount);
 router.post("/signin", authController.signIn);
+router.post("/google-login", authController.googleLogin);
 router.patch("/forgotPassword", authController.forgotPassword);
 router.patch("/resetPassword/:token", authController.resetPassword);
 router.get("/isSignedIn", authController.isSignedIn);

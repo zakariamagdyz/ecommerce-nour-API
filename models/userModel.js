@@ -18,13 +18,14 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     validate: [
       (value) => {
-        const pattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //check for email pattern
+        const pattern =
+          /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //check for email pattern
         return pattern.test(value);
       },
       "Invalid email adress",
     ],
   },
-  photo: String,
+  photo: { type: String, default: "default.jpg" },
 
   password: {
     type: String,
