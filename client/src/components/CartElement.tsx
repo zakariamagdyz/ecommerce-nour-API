@@ -3,6 +3,7 @@ import styled from "styled-components";
 // types
 import { IProduct } from "../redux/cart/slice";
 // components
+import { publicUrl } from "../axios/callConfig";
 
 // styles
 
@@ -37,7 +38,7 @@ export const Color = styled.div<{ photo: string }>`
   border-radius: 50%;
   margin: 1rem 0.5rem;
   background-image: ${(props) =>
-    `url(${process.env.REACT_APP_API_URL_DEV}/public/colors/${props.photo})`};
+    `url(${publicUrl}/public/colors/${props.photo})`};
   background-size: cover;
   background-position: center;
 `;

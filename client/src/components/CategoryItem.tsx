@@ -6,6 +6,8 @@ import { Link } from "react-router-dom";
 // types
 import { ICategory } from "../hooks/useGetCategory";
 
+import { publicUrl } from "../axios/callConfig";
+
 ///////////////////////////////////////////////
 
 const Container = styled.div`
@@ -68,9 +70,7 @@ interface Props {
 const CategoryItem: React.FC<Props> = ({ category }) => {
   return (
     <Container>
-      <Image
-        src={`${process.env.REACT_APP_API_URL_DEV}/public/categories/${category.photo}`}
-      />
+      <Image src={`${publicUrl}/public/categories/${category.photo}`} />
       <Info>
         <Title>{category.name}</Title>
         <Button to={`/category/${category._id}?${category.name}`}>

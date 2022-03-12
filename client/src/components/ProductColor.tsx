@@ -1,6 +1,7 @@
 import styled, { css } from "styled-components";
 import { useOrderData } from "../context/order";
 //types
+import { publicUrl } from "../axios/callConfig";
 
 const matchedColor = css`
   width: 4rem;
@@ -17,7 +18,7 @@ const FilterColor = styled.div<{ photo: string; isMatched: boolean }>`
   border-radius: 50%;
   margin: 1rem 0.5rem;
   background-image: ${(props) =>
-    `url(${process.env.REACT_APP_API_URL_DEV}/public/colors/${props.photo})`};
+    `url(${publicUrl}/public/colors/${props.photo})`};
   background-size: cover;
   background-position: center;
   cursor: pointer;

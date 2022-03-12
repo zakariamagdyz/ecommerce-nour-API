@@ -4,6 +4,8 @@ import ArrowLeftOutlinedIcon from "@mui/icons-material/ArrowLeftOutlined";
 import ArrowRightOutlined from "@mui/icons-material/ArrowRightOutlined";
 import mediaDevices from "../style/mediaDevices";
 import { Link } from "react-router-dom";
+import { publicUrl } from "../axios/callConfig";
+
 ////////////////////////////////////////
 
 const Container = styled.div`
@@ -136,11 +138,7 @@ const Slider: React.FC = () => {
         {sliderItems.map((sliderItem, inx) => (
           <Slide key={sliderItem.id} bg={sliderItem.bg}>
             <ImgContainer>
-              <Image
-                src={`${process.env.REACT_APP_API_URL_DEV}/public/imgs/slider-${
-                  inx + 1
-                }.jpg`}
-              />
+              <Image src={`${publicUrl}/public/imgs/slider-${inx + 1}.jpg`} />
             </ImgContainer>
             <InfoContainer>
               <Title>{sliderItem.title}</Title>
