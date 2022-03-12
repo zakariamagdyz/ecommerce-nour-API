@@ -12,7 +12,7 @@
     "build:server": "set NODE_ENV=production&&npm start",
     "build:client": "cd client && npm run build",
     "build:all": "concurrently \"npm run build:server\" \"npm run build:client\"",
-    "heroku-postbuild": "cd client&&npm install &&npm run build"
+    "heroku-postbuild": "npm install --prefix client && npm run build --prefix client"
   },
   "keywords": [],
   "author": "",
