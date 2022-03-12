@@ -39,14 +39,18 @@ app.use("/lamaApi/v1/orders", orderRouter);
 app.use("/lamaApi/v1/carts", cartRouter);
 app.use("/lamaApi/v1/products", productRouter);
 
-app.all("*", (req, res, next) => {
-  return next(
-    new HttpError(
-      `Can't find ${req.originalUrl} on this server, Please take a look at the documentation`,
-      404
-    )
-  );
+app.get("*", (req, res, next) => {
+  res.sendFile(path.join(__dirname, "client", "build", "index.html"));
 });
+
+// app.all("*", (req, res, next) => {
+//   return next(
+//     new HttpError(
+//       `Can't find ${req.originalUrl} on this server, Please take a look at the documentation`,
+//       404
+//     )
+//   );
+// });
 
 app.use(errorController);
 

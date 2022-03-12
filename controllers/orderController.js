@@ -29,17 +29,20 @@ exports.incomeStats = catchAsync(async (req, res, next) => {
 });
 
 exports.checkoutPayment = catchAsync(async (req, res, next) => {
+  console.log(req.body);
   const body = {
     source: req.body.token,
     amount: req.body.amount,
     currency: "usd",
   };
 
-  stripe.charges.create(body, (err, res) => {
+  stripe.charges.create(body, (err, successRes) => {
     if (err) {
       return next(new HttpError(err.message, 500));
     }
 
-    return res.status(200).json({ status: "success", data: { data: res } });
+    return res
+      .status(200)
+      .json({ status: "success", data: { data: successRes } });
   });
 });

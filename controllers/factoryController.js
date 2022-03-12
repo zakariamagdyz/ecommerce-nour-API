@@ -2,6 +2,7 @@ const HttpError = require("../utils/HttpError");
 const catchAsync = require("../utils/catchAsync");
 const ApiFeatures = require("../utils/ApiFeatures");
 const selectedFields = require("../utils/selectFields");
+const Logger = require("../services/loggerService.js");
 /////////////////////////////////////////////////////////////////////////////////
 
 const getModelName = (Model, plural) => {
@@ -46,7 +47,7 @@ exports.getOne = (Model, popOptions) =>
     const modelName = getModelName(Model);
     const query = Model.findById(req.params.id);
     if (popOptions) query.populate(popOptions);
-    const data = await query;
+    const data = await query.select("-__v");
 
     if (!data)
       return next(new HttpError(`No ${modelName} found with that ID!`, 400));
@@ -62,6 +63,9 @@ exports.createOne = (Model, selectedOptions = []) =>
     if (selectedOptions.length > 0)
       filterdBody = selectedFields(filterdBody, selectedOptions);
     const newDoc = await Model.create(filterdBody);
+
+    // add logger for creating
+    new Logger(modelName).info(`create ${modelName}`, newDoc);
 
     res.status(201).json({ status: "success", data: { [modelName]: newDoc } });
   });

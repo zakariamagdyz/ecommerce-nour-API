@@ -68,3 +68,12 @@ by aggregation pip line
 
 [{$unwind:{path:"$brothers"}},{$unwind:{path:"$brothers.friends"}},{$match:{brothers.friends.name:"omar"}}]
 
+
+
+
+
+
+
+
+aws secret key = uMYgbIhTF6aclpI3pslD8fVH4bw3lDOUVYga6KT3
+AWS_ACESS_ID =AKIASBV2B6KKOCSEIBHR
