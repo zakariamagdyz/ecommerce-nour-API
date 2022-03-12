@@ -39,7 +39,7 @@ app.use("/lamaApi/v1/orders", orderRouter);
 app.use("/lamaApi/v1/carts", cartRouter);
 app.use("/lamaApi/v1/products", productRouter);
 
-if (process.env.NODE_ENV === "development") {
+if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "client/build")));
   app.get("*", (req, res, next) => {
     res.sendFile(path.join(__dirname, "client", "build", "index.html"));
