@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import ArrowLeftOutlinedIcon from "@mui/icons-material/ArrowLeftOutlined";
 import ArrowRightOutlined from "@mui/icons-material/ArrowRightOutlined";
-import { sliderItems } from "../assets/data/data";
 import mediaDevices from "../style/mediaDevices";
 import { Link } from "react-router-dom";
 ////////////////////////////////////////
