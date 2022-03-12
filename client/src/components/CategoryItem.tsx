@@ -69,7 +69,7 @@ const CategoryItem: React.FC<Props> = ({ category }) => {
   return (
     <Container>
       <Image
-        src={`${process.env.REACT_APP_API_URL_DEV}/categories/${category.photo}`}
+        src={`${process.env.REACT_APP_API_URL_DEV}/public/categories/${category.photo}`}
       />
       <Info>
         <Title>{category.name}</Title>

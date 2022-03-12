@@ -17,7 +17,7 @@ const FilterColor = styled.div<{ photo: string; isMatched: boolean }>`
   border-radius: 50%;
   margin: 1rem 0.5rem;
   background-image: ${(props) =>
-    `url(${process.env.REACT_APP_API_URL_DEV}/colors/${props.photo})`};
+    `url(${process.env.REACT_APP_API_URL_DEV}/public/colors/${props.photo})`};
   background-size: cover;
   background-position: center;
   cursor: pointer;

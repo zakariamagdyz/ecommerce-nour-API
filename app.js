@@ -31,7 +31,7 @@ app.use(
 
 app.use(cookieParser());
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use("/public", express.static(path.join(__dirname, "public")));
 
 app.use("/lamaApi/v1/categories", categoryRouter);
 app.use("/lamaApi/v1/users", userRouter);
@@ -39,9 +39,12 @@ app.use("/lamaApi/v1/orders", orderRouter);
 app.use("/lamaApi/v1/carts", cartRouter);
 app.use("/lamaApi/v1/products", productRouter);
 
-app.get("*", (req, res, next) => {
-  res.sendFile(path.join(__dirname, "client", "build", "index.html"));
-});
+if (process.env.NODE_ENV === "development") {
+  app.use(express.static(path.join(__dirname, "client/build")));
+  app.get("*", (req, res, next) => {
+    res.sendFile(path.join(__dirname, "client", "build", "index.html"));
+  });
+}
 
 // app.all("*", (req, res, next) => {
 //   return next(

@@ -137,7 +137,7 @@ const Slider: React.FC = () => {
           <Slide key={sliderItem.id} bg={sliderItem.bg}>
             <ImgContainer>
               <Image
-                src={`${process.env.REACT_APP_API_URL_DEV}/imgs/slider-${
+                src={`${process.env.REACT_APP_API_URL_DEV}/public/imgs/slider-${
                   inx + 1
                 }.jpg`}
               />
