@@ -10,6 +10,7 @@ const orderRouter = require("./routes/orderRouter.js");
 const cartRouter = require("./routes/cartRouter.js");
 const productRouter = require("./routes/productRouter.js");
 const categoryRouter = require("./routes/categoryRouter.js");
+const compression = require("compression");
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use(
 );
 
 app.use(cookieParser());
+app.use(compression());
 
 app.use("/public", express.static(path.join(__dirname, "public")));
 
