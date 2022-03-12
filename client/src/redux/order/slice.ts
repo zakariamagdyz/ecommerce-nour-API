@@ -2,6 +2,8 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { IProduct } from "../cart/slice";
 import { RootState } from "../store";
 
+// hola
+
 interface IContact {
   email: string;
   billing_details: object;
