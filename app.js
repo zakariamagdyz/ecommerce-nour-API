@@ -43,7 +43,13 @@ const limitter = rateLimit({
 
 app.use("/", limitter);
 
-app.use(helmet({ crossOriginResourcePolicy: false }));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+    crossOriginOpenerPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  })
+);
 app.use(xssClean());
 app.use(mongoSanatize());
 
