@@ -11,6 +11,10 @@ const cartRouter = require("./routes/cartRouter.js");
 const productRouter = require("./routes/productRouter.js");
 const categoryRouter = require("./routes/categoryRouter.js");
 const compression = require("compression");
+const rateLimit = require("express-rate-limit");
+const xssClean = require("xss-clean");
+const mongoSanatize = require("express-mongo-sanitize");
+const helmet = require("helmet");
 
 const app = express();
 
@@ -18,7 +22,7 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-app.use(express.json());
+app.use(express.json({ limit: "10kb" }));
 
 app.use(
   cors({
@@ -29,6 +33,19 @@ app.use(
     credentials: true,
   })
 );
+
+// for security
+const limitter = rateLimit({
+  max: 300,
+  windowMS: 60 * 60 * 1000,
+  message: "Too many requests from this IP, Please try again in an hour",
+});
+
+app.use("/", limitter);
+
+app.use(helmet({ crossOriginResourcePolicy: false }));
+app.use(xssClean());
+app.use(mongoSanatize());
 
 app.use(cookieParser());
 app.use(compression());

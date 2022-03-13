@@ -108,6 +108,7 @@ export const signIn = createAsyncThunk<
     const { data } = await axios.post("/users/signin", body);
     return data.data.user;
   } catch (error: any) {
+    console.log(error);
     return handleError(error, rejectWithValue);
   }
 });
