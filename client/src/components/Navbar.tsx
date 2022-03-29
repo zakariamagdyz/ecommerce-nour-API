@@ -13,7 +13,7 @@ import CartDropdown from "./CartDropdown";
 ////////////////////////////////////////////////////////////
 
 const Container = styled.div`
-  height: 6rem;
+  min-height: 6rem;
 `;
 
 const Wrapper = styled.div`
@@ -79,7 +79,7 @@ const Logo = styled.h1`
 `;
 
 const MenuItem = styled(Link)`
-  font-size: 1.4rem;
+  font-size: 2rem;
   text-decoration: none;
   cursor: pointer;
   margin-left: 2.5rem;

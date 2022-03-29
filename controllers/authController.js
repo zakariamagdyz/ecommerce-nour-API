@@ -30,6 +30,7 @@ function setCookie(token, res) {
     ),
     secure: process.env.NODE_ENV === "production" ? true : false,
     httpOnly: process.env.NODE_ENV === "production" ? true : false,
+    sameSite: "strict", // client don't send cookie through anothre domain
   };
   res.cookie("jwt", token, cookieOptions);
 }
@@ -76,7 +77,8 @@ exports.signUp = catchAsync(async (req, res, next) => {
   if (user)
     return next(
       new HttpError(
-        "This user already exist, visit /forgotpassword to reset your password."
+        "This user already exist, visit /forgotpassword to reset your password.",
+        400
       )
     );
 

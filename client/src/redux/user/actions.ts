@@ -14,7 +14,7 @@ interface ValidationErrors {
 const handleError = (error: any, rej: Function) => {
   let err = error as AxiosError<ValidationErrors>;
 
-  if (!err.response) {
+  if (!err?.response) {
     throw err;
   }
   return rej(err.response.data);
@@ -85,7 +85,7 @@ export const signOut = createAsyncThunk<
 >("signout/get", async (_, ThunkApi) => {
   const { rejectWithValue } = ThunkApi;
   try {
-    return await axios.get("/users/signout");
+    await axios.get("/users/signout");
   } catch (error) {
     return handleError(error, rejectWithValue);
   }
@@ -108,7 +108,6 @@ export const signIn = createAsyncThunk<
     const { data } = await axios.post("/users/signin", body);
     return data.data.user;
   } catch (error: any) {
-    console.log(error);
     return handleError(error, rejectWithValue);
   }
 });
