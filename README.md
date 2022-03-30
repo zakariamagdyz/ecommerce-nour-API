@@ -1,6 +1,6 @@
 # NOUR Ecommerce app 🎉🎈🛒🥼👔👗🥾
 
-Developed Nour ecommerce app worked on the UI and Backend , deploy and tested app on [Nour ecommerce App](https://zakaria-nour-shop.herokuapp.com/)
+Developed Nour ecommerce app worked on the UI and Backend , deployed and tested app on [Nour ecommerce App](https://zakaria-nour-shop.herokuapp.com/)
 
 ## Features:
 
