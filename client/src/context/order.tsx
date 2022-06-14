@@ -16,7 +16,9 @@ type OrderProps = {
   children: React.ReactNode;
 };
 
-const OrderContextProvider: any = ({ children }: OrderProps) => {
+const OrderContextProvider: React.FC<OrderProps> = ({
+  children,
+}: OrderProps) => {
   const [size, setSize] = useState("");
   const [color, setColor] = useState("");
   const [quantity, setQuantity] = useState(1);

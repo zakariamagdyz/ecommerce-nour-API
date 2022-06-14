@@ -9,12 +9,8 @@ interface IChecks<DataType> {
   data: DataType[] | null;
 }
 
-interface IWrapp<DataType> {
-  data: DataType[];
-}
-
 const withChecks = <DataType, ChecksType extends IChecks<DataType>>(
-  WrappedComponent: React.ComponentType<IWrapp<DataType>>
+  WrappedComponent: React.ElementType
 ) => {
   return ({ isLoading, isError, data, message, ...others }: ChecksType) => {
     if (isLoading) {
