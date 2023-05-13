@@ -1,5 +1,5 @@
 import { Suspense, lazy } from "react";
-import { Routes, Route, Outlet, Navigate } from "react-router-dom";
+import { Routes, Route, Outlet, Navigate, useLocation } from "react-router-dom";
 import Error from "./Error";
 import Spinner from "./Spinner";
 import OrderData from "../context/order";
@@ -20,16 +20,15 @@ const OrderDetail = lazy(() => import("../pages/OrderDetail"));
 
 const RequireAuth = () => {
   const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn);
-  if (!isLoggedIn) return <Navigate to="/login" />;
+  const location = useLocation();
+  if (!isLoggedIn) return <Navigate to="/login" state={{ from: location }} />;
 
   return <Outlet />;
 };
 
-const RequireLogout = () => {
+const RequireAnon = () => {
   const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn);
-
   if (isLoggedIn) return <Navigate to="/" />;
-
   return <Outlet />;
 };
 
@@ -50,7 +49,7 @@ const RouterConfig = () => {
         />
 
         <Route path="/cart" element={<Cart />} />
-        <Route element={<RequireLogout />}>
+        <Route element={<RequireAnon />}>
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPass />} />

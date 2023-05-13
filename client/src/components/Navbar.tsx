@@ -19,7 +19,6 @@ const Container = styled.div`
 const Wrapper = styled.div`
   padding: 1rem 2rem;
   display: flex;
-  align-items: center;
 
   @media ${mediaDevices.mobile} {
     padding: 1rem;
@@ -35,6 +34,7 @@ const Center = styled.div`
 `;
 const Right = styled.div`
   flex: 2;
+
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -141,7 +141,9 @@ const Navbar: React.FC = () => {
           )}
           <MenuItem as="div" onClick={dropdownHandler}>
             <Badge badgeContent={itemCount} color="primary">
-              <ShoppingCartOutlinedIcon />
+              <ShoppingCartOutlinedIcon
+                style={{ fontSize: 25, marginTop: -5 }}
+              />
             </Badge>
           </MenuItem>
           {showDropdown && <CartDropdown handleDropdown={dropdownHandler} />}
